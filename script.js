@@ -1,10 +1,9 @@
 /*jshint esversion: 6 */
-
-
-
 // Global variables for X and O symbols
 var X = "&#10006;";
 var O = "O";
+
+
 // Game board module
 const gameBoard = (() => {
     let grid = document.getElementById("game-board");
@@ -26,6 +25,7 @@ const gameBoard = (() => {
 
     return {display};
 })();
+
 
 // Factory function for a single box of the tic tac toe grid
 function createGameBox() {
