@@ -23,7 +23,103 @@ const gameBoard = (() => {
         }
     };
 
-    return {display};
+    const reset = () => {
+        for (var i = 0; i < state.length; i++) {
+            state[i].setState("");
+            state[i].removeWinColor();
+        }
+    };
+
+    // Checks if any of the win conditions were met or the board is full
+    const checkResult = () => {
+
+        if (!isWin() && isFull()) {
+            return "draw";
+        }
+    };
+
+
+    function isFull() {
+        for (var i = 0; i < state.length; i++) {
+            if (state[i].getState() == "") return false;
+        }
+        return true;
+    }
+
+    function isWin() {
+        // Created local variables before OR'ing them together in order to make sure all win patterns are colored
+        let rowWin = checkRows();
+        let columnWin = checkColumns();
+        let diagonalWin = checkDiagonals();
+
+        if (rowWin || columnWin || diagonalWin) return true;
+        else return false;
+    }
+
+    function checkRows() {
+        let win = false;
+        // Loop over rows
+        for (var i = 0; i < state.length; i += 3) {
+            // Check if all elements in the row are nonempty and the same, color them if they are
+            if (state[i].getState() != "") {
+
+                if (state[i].getState() == state[i+1].getState() && state[i+1].getState() == state[i+2].getState()) {
+
+                    state[i].setWinColor();
+                    state[i+1].setWinColor();
+                    state[i+2].setWinColor();
+                    win = true;
+
+                }
+            }
+        }
+
+        return win;
+
+    }
+
+    function checkColumns() {
+        let win = false;
+        // Loop over rows
+        for (var i = 0; i < 3; i += 1) {
+            // Check if all elements in the row are nonempty and the same, color them if they are
+            if (state[i].getState() != "") {
+
+                if (state[i].getState() == state[i+3].getState() && state[i+3].getState()== state[i+6].getState()) {
+
+                    state[i].setWinColor();
+                    state[i+3].setWinColor();
+                    state[i+6].setWinColor();
+                    win = true;
+
+                }
+            }
+        }
+
+        return win;
+
+    }
+
+    function checkDiagonals() {
+        let win = false;
+        if (state[4].getState() != "") {
+            if (state[0].getState() == state[4].getState() && state[4].getState() == state[8].getState()) {
+                state[0].setWinColor();
+                state[4].setWinColor();
+                state[8].setWinColor();
+            }
+
+            if (state[2].getState() == state[4].getState() && state[4].getState() == state[6].getState()) {
+                state[2].setWinColor();
+                state[4].setWinColor();
+                state[6].setWinColor();
+            }
+
+        } 
+        return win;
+    }
+
+    return {display, checkResult, reset};
 })();
 
 
@@ -32,22 +128,48 @@ function createGameBox() {
     let gameBox = document.createElement("div");
     gameBox.classList.add("game-box");
     gameBox.innerHTML = "";
-    gameBox.addEventListener("click", updateTurn);
-    gameBox.addEventListener("click", updateSymbol);
+    gameBox.addEventListener("click", updateBox);
+
+
+    function updateBox() {
+        if (gameBox.innerHTML != "") return;
+        else {
+            updateSymbol();
+            updateTurn();
+        }
+    }
 
     function updateSymbol() {
-        gameBox.innerHTML = currentTurn? X : O;
+        gameBox.innerHTML = currentTurn? O : X;
     }
 
     const setState = (symbol) => {
         gameBox.innerHTML = symbol;
     };
 
+    const getState = () => {
+        return gameBox.innerHTML;
+    };
+
     const displayBox = (grid) => {
         grid.appendChild(gameBox);
     };
 
-    return {setState, displayBox};
+    const setWinColor = () => {
+        gameBox.classList.add("win-color");
+    };
+
+    const removeWinColor = () => {
+        gameBox.classList.remove("win-color");
+    };
+
+
+    const endGame = (result) => {
+
+    };
+    
+
+    return {setState, displayBox, getState, setWinColor, removeWinColor};
 }
 
 
@@ -115,6 +237,7 @@ function updateTurn() {
     player2.nextTurn();
     player1.updateInfo();
     player2.updateInfo();
+    gameBoard.checkResult();
     currentTurn = !currentTurn;
 }
 
