@@ -182,6 +182,7 @@ function createPlayer(ID_number, name = "Anonymous Player") {
     // TODO: change this to use more appropriate elements
 
     let playerBox = document.createElement("div");
+    playerBox.classList.add("player-box");
     playerBox.classList.add(ID ? "player2-box" : "player1-box");
 
       
@@ -191,17 +192,22 @@ function createPlayer(ID_number, name = "Anonymous Player") {
 
     playerBox.appendChild(playerName);
     playerBox.appendChild(playerTurn);
-    playerName.textContent = name;
-    playerTurn.textContent = currentTurn ? `Your turn` : `Their turn`;
+    setPlayerText();
+    setTurnMarker();
 
 
     // TODO: add score
     
 
+    function setPlayerText() {
+        playerName.textContent = name;
+        playerTurn.textContent = currentTurn ? `Your turn` : ``;
+    }
+
 
     const updateInfo = () => {
-        playerName.textContent = name;
-        playerTurn.textContent = currentTurn ? `Your turn` : `Their turn`;
+        setPlayerText();
+        setTurnMarker();
     };  
 
     const nextTurn = () => {
@@ -211,6 +217,16 @@ function createPlayer(ID_number, name = "Anonymous Player") {
     const displayInfo = () => {
         document.getElementById("main-div").appendChild(playerBox);
     };
+
+    function setTurnMarker() {
+        if (currentTurn) {
+            playerBox.classList.add("current-turn");
+        }
+        
+        else {
+            playerBox.classList.remove("current-turn");
+        }
+    }
 
 
     return {ID, currentTurn, displayInfo, nextTurn, updateInfo};

@@ -10,6 +10,11 @@ h1 {
     color: red;
 }
 
+
+.current-turn {
+    background-color:rgba(153, 255, 153, 0.664);
+}
+
 .game-board {
     display: grid;
     width: 30%;
@@ -37,8 +42,15 @@ h1 {
     cursor: pointer;
 }
 
+
+.player-box {
+    padding: 10px;
+    border-radius: 5px;
+}
+
 .player1-box {
     float: left;
+    
 }
 
 .player2-box {
