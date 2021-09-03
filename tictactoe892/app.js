@@ -5,7 +5,7 @@ const app = express();
 
 app.use(express.static('tictactoe892'));
 
-const port = process.env.port || 3000;
+const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
     res.statusCode = 200;
@@ -24,6 +24,6 @@ app.get('/styles.css', (req, res) => {
 });
 
 
-app.listen(port, () => {
-    console.log(`Server running at port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Server running at port ${PORT}`);
 });
