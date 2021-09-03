@@ -5,7 +5,7 @@ const app = express();
 
 app.use(express.static('tictactoe892'));
 
-const port = 3000;
+const port = process.env.port;
 
 app.get('/', (req, res) => {
     res.statusCode = 200;
