@@ -1,3 +1,7 @@
 {
-    "name" : "tictactoe892"
+    "name" : "tictactoe892",
+    "scripts" : {
+        "start" : "node app.js"
+    }
 }
+
