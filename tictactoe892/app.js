@@ -7,7 +7,7 @@ app.use(express.static('tictactoe892'));
 
 const port = 3000;
 
-app.get((req, res) => {
+app.get('/*', (req, res) => {
     res.statusCode = 200;
     res.sendFile('index.html', {root: __dirname});
 });
