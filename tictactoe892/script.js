@@ -44,7 +44,11 @@ const gameBoard = (() => {
     const checkResult = () => {
 
         if (!isWin() && isFull()) {
-            return "draw";
+            endWithDraw();
+        }
+
+        else if (isWin()) {
+            endWithWin();
         }
     };
 
@@ -161,7 +165,9 @@ function createGameBox() {
     gameBox.classList.add("game-box");
     gameBox.innerHTML = "";
     gameBox.addEventListener("click", function() {
-        emitClickedBox(index);
+        if (getState() == "") {
+            emitClickedBox(index);
+        }
     });
 
     function setIndex(i) {
