@@ -1,12 +1,13 @@
 {
     "name": "tictactoe892",
     "scripts": {
-        "start": "node app.js"
+        "start": "node server.js"
     },
     "dependencies": {
-        "express": "^4.17.1"
+        "express": "^4.17.1",
+        "socket.io": "^4.2.0"
     },
-    "engines" : {
-        "node" : "14.x"
+    "engines": {
+        "node": "14.x"
     }
 }

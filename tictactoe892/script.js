@@ -1,4 +1,7 @@
 /*jshint esversion: 6 */
+
+
+
 // Global variables for X and O symbols
 var X = "&#10006;";
 var O = "O";
@@ -10,11 +13,17 @@ const gameBoard = (() => {
 
     // The state of the board is controlled by an array of divs that detect clicks and display symbols
     let state = [];
+    let compressedState = [];
+
     for (var i = 0; i < 9; i++) {
         let newBox = createGameBox();
-        state.push(newBox);
+        newBox.setIndex(i);
+        state.push(newBox);  
     }
-    
+
+    function getState(index) {
+        return state[index].getState();
+    }
 
     const display = () => {
         grid.innerHTML = ``;
@@ -119,17 +128,43 @@ const gameBoard = (() => {
         return win;
     }
 
-    return {display, checkResult, reset};
+    function updateBox(index) {
+        state[index].updateBox();
+    }
+
+    function printIndex(box) {
+        console.log(state.findIndex(box));
+    }
+
+    function setGameBoard(serverState) {
+        for (var i = 0; i < serverState.length; i++) {
+            state[i].setState(serverState[i]);
+            compressedState[i] = serverState[i];  
+        }
+        display();
+    }
+
+    function getCompressedState() {
+        return compressedState;
+    }
+
+    return {setGameBoard, getState, display, checkResult, reset, printIndex, updateBox, getCompressedState};
 })();
 
 
 // Factory function for a single box of the tic tac toe grid
 function createGameBox() {
     let gameBox = document.createElement("div");
+    let index = 0;
     gameBox.classList.add("game-box");
     gameBox.innerHTML = "";
-    gameBox.addEventListener("click", updateBox);
+    gameBox.addEventListener("click", function() {
+        emitClickedBox(index);
+    });
 
+    function setIndex(i) {
+        index = i;
+    }
 
     function updateBox() {
         if (gameBox.innerHTML != "") return;
@@ -169,7 +204,7 @@ function createGameBox() {
     };
     
 
-    return {setState, displayBox, getState, setWinColor, removeWinColor};
+    return {setState, displayBox, getState, setWinColor, removeWinColor, setIndex, updateBox};
 }
 
 
@@ -233,7 +268,7 @@ function createPlayer(ID_number, name = "Anonymous Player") {
 
 }
 
-
+var socket = io();
 
 var player1 = createPlayer(0, "Player 1");
 
@@ -246,6 +281,35 @@ var player2 = createPlayer(1, "Player 2");
 player2.displayInfo();
 
 var currentTurn = 0;
+
+
+socket.on('clicked box', (index) => {
+    gameBoard.updateBox(index);
+});
+
+socket.on('set board', (serverState) => {
+    gameBoard.setGameBoard(serverState);
+});
+
+socket.on('reset board', () => {
+    currentTurn = 0;
+    gameBoard.reset();
+});
+
+socket.on('set id', (id) => {
+    socket.userId = id;
+});
+
+
+function emitClickedBox(box_index) {
+    if (socket.userId == currentTurn) {
+        socket.emit('clicked box', box_index);
+    }   
+}
+
+
+
+
 
 
 function updateTurn() {
