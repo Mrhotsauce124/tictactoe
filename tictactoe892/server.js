@@ -1,4 +1,8 @@
 /* jshint esversion: 6 */
+
+var X = "&#10006;";
+var O = "O";
+
 const express = require('express');
 const socketio = require('socket.io');
 const http = require('http');
@@ -16,7 +20,14 @@ const io = new Server(server);
 
 var players = [];
 
-var serverGameBoard;
+var serverState = [];
+
+for (var i = 0; i < 9; i++) {
+    serverState.push("");
+} 
+
+
+var turn = 0;
 
 app.get('/', (req, res) => {
     res.statusCode = 200;
@@ -34,14 +45,19 @@ io.on('connection', (socket) => {
         console.log(`Resetting board`);
         io.emit('reset board');
     }
+
+    else {
+        io.to(socket.id).emit('set board', {state: serverState, turn: turn});
+    }
     
 
-
-
-    socket.on('clicked box', (index) => {
-        //serverGameBoard = gameBoard;
-        console.log(`Box ${index} was clicked!`);
-        io.emit('clicked box', index);
+    socket.on('clicked box', (data) => {
+        serverState = data.state;
+        serverState[data.index] = data.turn? O : X;
+        turn = !data.turn;
+        console.log(serverState);
+        console.log(`Box ${data.index} was clicked!`);
+        io.emit('clicked box', serverState);
     });
 
     socket.on('disconnect', () => {

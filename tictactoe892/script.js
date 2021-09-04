@@ -19,6 +19,7 @@ const gameBoard = (() => {
         let newBox = createGameBox();
         newBox.setIndex(i);
         state.push(newBox);  
+        compressedState.push("");
     }
 
     function getState(index) {
@@ -130,6 +131,7 @@ const gameBoard = (() => {
 
     function updateBox(index) {
         state[index].updateBox();
+        compressedState[index] = state[index].getState();
     }
 
     function printIndex(box) {
@@ -283,12 +285,14 @@ player2.displayInfo();
 var currentTurn = 0;
 
 
-socket.on('clicked box', (index) => {
-    gameBoard.updateBox(index);
+socket.on('clicked box', (serverState) => {
+    gameBoard.setGameBoard(serverState);
+    updateTurn();
 });
 
-socket.on('set board', (serverState) => {
-    gameBoard.setGameBoard(serverState);
+socket.on('set board', (serverData) => {
+    gameBoard.setGameBoard(serverData.state);
+    currentTurn = serverData.turn;
 });
 
 socket.on('reset board', () => {
@@ -303,7 +307,7 @@ socket.on('set id', (id) => {
 
 function emitClickedBox(box_index) {
     if (socket.userId == currentTurn) {
-        socket.emit('clicked box', box_index);
+        socket.emit('clicked box', {index : box_index, state : gameBoard.getCompressedState(), turn: currentTurn});
     }   
 }
 
