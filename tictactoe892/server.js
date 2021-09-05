@@ -21,16 +21,14 @@ var players = [];
 
 var serverState = [];
 
+var gameEnded = 0;
+
 for (var i = 0; i < 9; i++) {
     serverState.push("");
 } 
 
-
-
-
-
-
 var turn = 0;
+
 
 app.get('/', (req, res) => {
     res.statusCode = 200;
@@ -60,7 +58,18 @@ io.on('connection', (socket) => {
         turn = !data.turn;
         console.log(serverState);
         console.log(`Box ${data.index} was clicked!`);
-        io.emit('clicked box', serverState);
+        io.emit('clicked box', {serverState, turn});
+    });
+
+    socket.on('end game', (result) => {
+
+        if (gameEnded == 1) {
+            return;
+        }
+        gameEnded = 1;
+
+        console.log(`The game ended with result: ${result}`);
+        io.emit('end game', result);
     });
 
     socket.on('restart requested', (senderId) => {
@@ -125,5 +134,6 @@ function resetState() {
     for (var i = 0; i < 9; i++) {
         serverState[i] = "";
     }
+    gameEnded = 0;
     io.emit('reset board');
 }

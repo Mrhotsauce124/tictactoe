@@ -70,8 +70,7 @@ const gameBoard = (() => {
         let columnWin = checkColumns();
         let diagonalWin = checkDiagonals();
 
-        if (rowWin || columnWin || diagonalWin) return true;
-        else return false;
+        return (rowWin || columnWin || diagonalWin);
     }
 
     function checkRows() {
@@ -125,12 +124,14 @@ const gameBoard = (() => {
                 state[0].setWinColor();
                 state[4].setWinColor();
                 state[8].setWinColor();
+                win = true;
             }
 
             if (state[2].getState() == state[4].getState() && state[4].getState() == state[6].getState()) {
                 state[2].setWinColor();
                 state[4].setWinColor();
                 state[6].setWinColor();
+                win = true;
             }
 
         } 
@@ -343,6 +344,11 @@ const resultModal =  (() => {
     closeButton.classList.add("generic-button");
     closeButton.textContent = `Close`;
     closeButton.addEventListener("click", hideResult);
+
+    resultContent.appendChild(resultMessage);
+    resultContent.appendChild(closeButton);
+    resultModal.appendChild(resultContent);
+    document.getElementById("main-div").appendChild(resultModal);
     
     function setResult(result) {
         if (result == "nothing") {
@@ -354,10 +360,10 @@ const resultModal =  (() => {
         }
 
         else {
-            let winnerName = currentTurn? "Player 2" : "Player 1";
+            let winnerName = currentTurn? "Player 1" : "Player 2";
             resultMessage.textContent = `${winnerName} has won the game!`;
         }
-        
+
         showResult();
     }
 
@@ -389,9 +395,9 @@ player2.displayInfo();
 var currentTurn = 0;
 
 
-socket.on('clicked box', (serverState) => {
-    gameBoard.setGameBoard(serverState);
-    updateTurn();
+socket.on('clicked box', (data) => {
+    gameBoard.setGameBoard(data.serverState);
+    updateTurn(data.turn);
 });
 
 socket.on('set board', (serverData) => {
@@ -406,6 +412,10 @@ socket.on('reset board', () => {
 
 socket.on('set id', (id) => {
     socket.userId = id;
+});
+
+socket.on('end game', (result) => {
+    endGame(result);
 });
 
 socket.on('restart requested', restart.showModal); 
@@ -426,16 +436,16 @@ function requestRestart() {
 
 
 
-
-
-
-
-function updateTurn() {
+function updateTurn(turn) {
     player1.nextTurn();
     player2.nextTurn();
-    gameBoard.checkResult();
-    currentTurn = !currentTurn;
+    let result = gameBoard.checkResult();
+    if (result != "nothing") {
+        socket.emit('end game', result);
+    }
+    currentTurn = turn;
 }
+
 
 function resetTurn() {
     player1.setTurn(true);
@@ -443,10 +453,10 @@ function resetTurn() {
     currentTurn = 0;
 }
 
-
-
-
-function announceDraw() {
-
+function endGame(result) {
+    resultModal.setResult(result);
+    currentTurn = 2;
 }
+
+
 

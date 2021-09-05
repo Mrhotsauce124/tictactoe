@@ -17,7 +17,7 @@ h1 {
 
 .game-board {
     display: grid;
-    width: 30%;
+    width: 40%;
     margin: 0 auto;
     justify-content: center;
     grid-template-rows: repeat(3, 1fr);
@@ -27,12 +27,14 @@ h1 {
 .game-box {
     /*float left so it can be aligned side by side with player info*/
     display: flex;
+    flex-grow: 0;
+    flex-shrink: 0;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     aspect-ratio: 1;
     background-color: rgb(255, 255, 255);
     justify-content: center;
     align-items: center;
-    font-size: 5em;
+    font-size: 4em;
     border: 4px solid black;
 
 }
@@ -74,7 +76,15 @@ h1 {
     background-color:rgba(153, 223, 255, 0.664);
     padding: 5%;
     border-radius: 20px;
+}
 
+.result-content {
+    width: 50%;
+    margin: auto;
+    align-items: center;
+    background-color:rgba(214, 179, 255, 0.664);
+    padding: 5%;
+    border-radius: 20px;
 }
 
 .generic-button {
