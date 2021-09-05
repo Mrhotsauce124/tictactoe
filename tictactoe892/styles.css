@@ -60,3 +60,27 @@ h1 {
 .win-color {
     color: green;
 }
+
+.restart-modal {
+    margin: 5px;
+    margin-left: 20%;
+    margin-right: 20%;
+}
+
+.restart-content {
+    width: 50%;
+    margin: auto;
+    align-items: center;
+    background-color:rgba(153, 223, 255, 0.664);
+    padding: 5%;
+    border-radius: 20px;
+
+}
+
+.generic-button {
+    display: inline;
+    float: none;
+    width: 20%;
+    aspect-ratio: 3;
+    border-radius: 10px;
+}

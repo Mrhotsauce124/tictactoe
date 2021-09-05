@@ -4,7 +4,6 @@ var X = "&#10006;";
 var O = "O";
 
 const express = require('express');
-const socketio = require('socket.io');
 const http = require('http');
 const { Server } = require('socket.io');
 
@@ -27,6 +26,10 @@ for (var i = 0; i < 9; i++) {
 } 
 
 
+
+
+
+
 var turn = 0;
 
 app.get('/', (req, res) => {
@@ -43,7 +46,7 @@ io.on('connection', (socket) => {
 
     if (socket.userId < 2) {
         console.log(`Resetting board`);
-        io.emit('reset board');
+        resetState();
     }
 
     else {
@@ -58,6 +61,18 @@ io.on('connection', (socket) => {
         console.log(serverState);
         console.log(`Box ${data.index} was clicked!`);
         io.emit('clicked box', serverState);
+    });
+
+    socket.on('restart requested', (senderId) => {
+        console.log('Restart requested, forwarding request...');
+        let receiverId = !senderId;
+        receiverSocket = players.filter((player) => player.userId == receiverId)[0];
+        io.to(receiverSocket.id).emit('restart requested');
+    });
+
+    socket.on('restart accepted', () => {
+        console.log('Restart accepted, resetting...');
+        resetState();
     });
 
     socket.on('disconnect', () => {
@@ -103,4 +118,12 @@ function printIds(players) {
     }
 
     console.log(ids);
+}
+
+
+function resetState() {
+    for (var i = 0; i < 9; i++) {
+        serverState[i] = "";
+    }
+    io.emit('reset board');
 }

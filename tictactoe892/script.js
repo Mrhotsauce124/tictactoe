@@ -37,6 +37,7 @@ const gameBoard = (() => {
         for (var i = 0; i < state.length; i++) {
             state[i].setState("");
             state[i].removeWinColor();
+            compressedState[i] = "";
         }
     };
 
@@ -44,11 +45,14 @@ const gameBoard = (() => {
     const checkResult = () => {
 
         if (!isWin() && isFull()) {
-            endWithDraw();
+            return "draw";
         }
 
         else if (isWin()) {
-            endWithWin();
+            return "win";
+        }
+        else {
+            return "nothing";
         }
     };
 
@@ -154,6 +158,7 @@ const gameBoard = (() => {
         return compressedState;
     }
 
+
     return {setGameBoard, getState, display, checkResult, reset, printIndex, updateBox, getCompressedState};
 })();
 
@@ -205,11 +210,6 @@ function createGameBox() {
     const removeWinColor = () => {
         gameBox.classList.remove("win-color");
     };
-
-
-    const endGame = (result) => {
-
-    };
     
 
     return {setState, displayBox, getState, setWinColor, removeWinColor, setIndex, updateBox};
@@ -255,6 +255,7 @@ function createPlayer(ID_number, name = "Anonymous Player") {
 
     const nextTurn = () => {
         currentTurn = !currentTurn;
+        updateInfo();
     };
     
     const displayInfo = () => {
@@ -271,14 +272,111 @@ function createPlayer(ID_number, name = "Anonymous Player") {
         }
     }
 
+    function setTurn(turn) {
+        currentTurn = turn;
+        updateInfo();
+    }
 
-    return {ID, currentTurn, displayInfo, nextTurn, updateInfo};
+
+    return {ID, currentTurn, displayInfo, nextTurn, setTurn};
 
 }
+
+function createRestartModal() {
+
+    const restartModal = document.createElement("div");
+    restartModal.classList.add("restart-modal");
+    restartModal.hidden = true;
+
+
+    const restartContent = document.createElement("div");
+    restartContent.classList.add("restart-content");
+
+
+    const prompt = document.createElement("h2");
+    prompt.textContent = `Your opponent has requested a rematch. Do you accept?`;
+
+    const yesButton = document.createElement("button");
+    yesButton.classList.add("generic-button");
+    yesButton.textContent = `Yes`;
+    yesButton.addEventListener("click", hideModal );
+    yesButton.addEventListener("click", () => { socket.emit('restart accepted'); });
+
+    const noButton = document.createElement("button");
+    noButton.classList.add("generic-button");
+    noButton.textContent = `No`;
+    noButton.addEventListener("click", hideModal);
+
+    restartContent.appendChild(prompt);
+    restartContent.appendChild(yesButton);
+    restartContent.appendChild(noButton);
+
+    restartModal.appendChild(restartContent);
+
+    document.getElementById("main-div").appendChild(restartModal);
+
+
+    function hideModal() {
+        restartModal.hidden = true;
+    }
+
+    function showModal() {
+        restartModal.hidden = false;
+    }
+
+    return {showModal};
+
+
+}
+
+const resultModal =  (() => {
+    const resultModal = document.createElement("div");
+    resultModal.classList.add("result-modal");
+    resultModal.hidden = true;
+
+    const resultContent = document.createElement("div");
+    resultContent.classList.add("result-content");
+
+    const resultMessage = document.createElement("h2");
+
+    const closeButton = document.createElement("button");
+    closeButton.classList.add("generic-button");
+    closeButton.textContent = `Close`;
+    closeButton.addEventListener("click", hideResult);
+    
+    function setResult(result) {
+        if (result == "nothing") {
+            return;
+        }
+
+        if (result == "draw") {
+            resultMessage.textContent =`The game ended in a draw`;
+        }
+
+        else {
+            let winnerName = currentTurn? "Player 2" : "Player 1";
+            resultMessage.textContent = `${winnerName} has won the game!`;
+        }
+        
+        showResult();
+    }
+
+    function showResult() {
+        resultModal.hidden = false;
+    }
+
+    function hideResult() {
+        resultModal.hidden = true;
+    }
+
+    return {setResult};
+})();
 
 var socket = io();
 
 var player1 = createPlayer(0, "Player 1");
+
+var restart = createRestartModal();
 
 player1.displayInfo();
 
@@ -302,13 +400,15 @@ socket.on('set board', (serverData) => {
 });
 
 socket.on('reset board', () => {
-    currentTurn = 0;
+    resetTurn();
     gameBoard.reset();
 });
 
 socket.on('set id', (id) => {
     socket.userId = id;
 });
+
+socket.on('restart requested', restart.showModal); 
 
 
 function emitClickedBox(box_index) {
@@ -318,6 +418,14 @@ function emitClickedBox(box_index) {
 }
 
 
+function requestRestart() {
+    if (socket.userId < 2) {
+        socket.emit('restart requested', socket.userId);
+    }
+}
+
+
+
 
 
 
@@ -325,9 +433,20 @@ function emitClickedBox(box_index) {
 function updateTurn() {
     player1.nextTurn();
     player2.nextTurn();
-    player1.updateInfo();
-    player2.updateInfo();
     gameBoard.checkResult();
     currentTurn = !currentTurn;
+}
+
+function resetTurn() {
+    player1.setTurn(true);
+    player2.setTurn(false);
+    currentTurn = 0;
+}
+
+
+
+
+function announceDraw() {
+
 }
 
