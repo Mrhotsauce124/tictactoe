@@ -17,7 +17,7 @@ h1 {
 
 .game-board {
     display: grid;
-    width: 40%;
+    width: 30%;
     margin: 0 auto;
     justify-content: center;
     grid-template-rows: repeat(3, 1fr);
